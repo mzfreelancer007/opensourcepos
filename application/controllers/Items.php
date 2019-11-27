@@ -9,6 +9,8 @@ class Items extends Secure_Controller
 		parent::__construct('items');
 
 		$this->load->library('item_lib');
+		$this->load->library('events');
+		$this->load->event('integrations');
 	}
 
 	public function index()
@@ -19,7 +21,7 @@ class Items extends Secure_Controller
 		$data['stock_location'] = $this->xss_clean($this->item_lib->get_item_location());
 		$data['stock_locations'] = $this->xss_clean($this->Stock_location->get_allowed_locations());
 
-	//Filters that will be loaded in the multiselect dropdown
+		// filters that will be loaded in the multiselect dropdown
 		$data['filters'] = array('empty_upc' => $this->lang->line('items_empty_upc_items'),
 			'low_inventory' => $this->lang->line('items_low_inventory_items'),
 			'is_serialized' => $this->lang->line('items_serialized_items'),
@@ -58,7 +60,7 @@ class Items extends Secure_Controller
 			'temporary' => FALSE,
 			'definition_ids' => array_keys($definition_names));
 
-	//Check if any filter is set in the multiselect dropdown
+		// check if any filter is set in the multiselect dropdown
 		$filledup = array_fill_keys($this->input->get('filters'), TRUE);
 		$filters = array_merge($filters, $filledup);
 
@@ -84,11 +86,11 @@ class Items extends Secure_Controller
 		$this->load->helper('file');
 		$this->load->library('image_lib');
 
-	//In this context, $pic_filename always has .ext
+		// in this context, $pic_filename always has .ext
 		$ext = pathinfo($pic_filename, PATHINFO_EXTENSION);
 		$images = glob('./uploads/item_pics/' . $pic_filename);
 
-	//Make sure we pick only the file name, without extension
+		// make sure we pick only the file name, without extension
 		$base_path = './uploads/item_pics/' . pathinfo($pic_filename, PATHINFO_FILENAME);
 		if(sizeof($images) > 0)
 		{
@@ -186,7 +188,7 @@ class Items extends Secure_Controller
 			$data = array();
 		}
 
-	//allow_temp_items is set in the index function of items.php or sales.php
+		// allow_temp_items is set in the index function of items.php or sales.php
 		$data['allow_temp_item'] = $this->session->userdata('allow_temp_items');
 		$data['item_tax_info'] = $this->xss_clean($this->Item_taxes->get_info($item_id));
 		$data['default_tax_1_rate'] = '';
@@ -262,7 +264,7 @@ class Items extends Secure_Controller
 
 		$data['standard_item_locked'] = ($data['item_kit_disabled'] && $item_info->item_type == ITEM_KIT
 			&& !$data['allow_temp_item']
-			& !($this->config->item('derive_sale_quantity') == '1'));
+			&& !($this->config->item('derive_sale_quantity') == '1'));
 
 		$data['item_info'] = $item_info;
 
@@ -315,12 +317,12 @@ class Items extends Secure_Controller
 
 		if($ext == '')
 		{
-		//If file extension is not found guess it (legacy)
+			// if file extension is not found guess it (legacy)
 			$images = glob('./uploads/item_pics/' . $item_info->pic_filename . '.*');
 		}
 		else
 		{
-		//Else just pick that file
+			// else just pick that file
 			$images = glob('./uploads/item_pics/' . $item_info->pic_filename);
 		}
 
@@ -408,15 +410,15 @@ class Items extends Secure_Controller
 
 		$data['barcode_config'] = $config;
 
-	//Check the list of items to see if any item_number field is empty
+		// check the list of items to see if any item_number field is empty
 		foreach($result as &$item)
 		{
 			$item = $this->xss_clean($item);
 
-		//Update the barcode field if empty / NULL with the newly generated barcode
+			// update the barcode field if empty / NULL with the newly generated barcode
 			if(empty($item['item_number']) && $this->config->item('barcode_generate_if_empty'))
 			{
-			// get the newly generated barcode
+				// get the newly generated barcode
 				$barcode_instance = Barcode_lib::barcode_instance($item, $config);
 				$item['item_number'] = $barcode_instance->getData();
 
@@ -501,7 +503,7 @@ class Items extends Secure_Controller
 		}
 		$default_pack_name = $this->lang->line('items_default_pack_name');
 
-	//Save item data
+		//Save item data
 		$item_data = array(
 			'name' => $this->input->post('name'),
 			'description' => $this->input->post('description'),
@@ -543,7 +545,7 @@ class Items extends Secure_Controller
 
 		if(!empty($upload_data['orig_name']))
 		{
-		// XSS file image sanity check
+			// XSS file image sanity check
 			if($this->xss_clean($upload_data['raw_name'], TRUE) === TRUE)
 			{
 				$item_data['pic_filename'] = $upload_data['raw_name'];
@@ -635,6 +637,16 @@ class Items extends Secure_Controller
 				$message = $this->xss_clean($this->lang->line('items_successful_' . ($new_item ? 'adding' : 'updating')) . ' ' . $item_data['name']);
 
 				echo json_encode(array('success' => TRUE, 'message' => $message, 'id' => $item_id));
+
+			//Event triggers for Third-Party Integrations
+				if($new_item)
+				{
+					Events::Trigger('event_create', array("type"=> "ITEMS", "data" => array($item_data)), 'string');
+				}
+				else
+				{
+					Events::Trigger('event_update', array("type"=> "ITEMS", "data" => array($item_data)), 'string');
+				}
 			}
 			else
 			{
@@ -643,7 +655,7 @@ class Items extends Secure_Controller
 				echo json_encode(array('success' => FALSE, 'message' => $message, 'id' => $item_id));
 			}
 		}
-		else //Failure
+		else // failure
 		{
 			$message = $this->xss_clean($this->lang->line('items_error_adding_updating') . ' ' . $item_data['name']);
 
@@ -714,7 +726,7 @@ class Items extends Secure_Controller
 
 		$this->Inventory->insert($inv_data);
 
-	//Update stock quantity
+		//Update stock quantity
 		$item_quantity = $this->Item_quantity->get_item_quantity($item_id, $location_id);
 		$item_quantity_data = array(
 			'item_id' => $item_id,
@@ -743,7 +755,7 @@ class Items extends Secure_Controller
 
 		foreach($_POST as $key => $value)
 		{
-		//This field is nullable, so treat it differently
+			//This field is nullable, so treat it differently
 			if($key == 'supplier_id' && $value != '')
 			{
 				$item_data["$key"] = $value;
@@ -793,6 +805,9 @@ class Items extends Secure_Controller
 		{
 			$message = $this->lang->line('items_successful_deleted') . ' ' . count($items_to_delete) . ' ' . $this->lang->line('items_one_or_multiple');
 			echo json_encode(array('success' => TRUE, 'message' => $message));
+
+		//Event triggers for Third-Party Integrations
+			Events::Trigger('event_delete', array("type"=> "ITEMS", "data" => $items_to_delete), 'string');
 		}
 		else
 		{
@@ -838,8 +853,7 @@ class Items extends Secure_Controller
 				for($i = 1; $i < count($line_array); $i++)
 				{
 					$invalidated	= FALSE;
-
-					$line = array_combine($keys,$this->xss_clean($line_array[$i]));	//Build a XSS-cleaned associative array with the row to use to assign values
+					$line 			= array_combine($keys,$this->xss_clean($line_array[$i]));	//Build a XSS-cleaned associative array with the row to use to assign values
 
 					$item_data = array(
 						'name'					=> $line['Item Name'],
@@ -859,8 +873,8 @@ class Items extends Secure_Controller
 
 					if(!empty($item_number))
 					{
-						$item_data['item_number'] = $item_number;
-						$invalidated = $this->Item->item_number_exists($item_number);
+						$item_data['item_number']	= $item_number;
+						$invalidated				= $this->Item->item_number_exists($item_number);
 					}
 
 				//Sanity check of data
@@ -869,12 +883,22 @@ class Items extends Secure_Controller
 						$invalidated = $this->data_error_check($line, $item_data);
 					}
 
-				//Save to database
+					//Save to database
 					if(!$invalidated && $this->Item->save($item_data))
 					{
 						$this->save_tax_data($line, $item_data);
 						$this->save_inventory_quantities($line, $item_data);
 						$this->save_attribute_data($line, $item_data);
+
+					//Event triggers for Third-Party Integrations
+						if($this->Item->item_number_exists($item_number))
+						{
+							Events::Trigger('event_update', array("type"=> "ITEMS", "data" => $item_data), 'string');
+						}
+						else
+						{
+							Events::Trigger('event_create', array("type"=> "ITEMS", "data" => $item_data), 'string');
+						}
 					}
 
 				//Insert or update item failure
@@ -906,7 +930,7 @@ class Items extends Secure_Controller
 	}
 
 	/**
-	 * Checks the entire line of data in an import file for errors
+	 * Checks the entire line of data for errors
 	 *
 	 * @param	array	$line
 	 * @param 	array	$item_data
@@ -915,7 +939,7 @@ class Items extends Secure_Controller
 	 */
 	private function data_error_check($line, $item_data)
 	{
-	//Check for empty required fields
+		//Check for empty required fields
 		$check_for_empty = array(
 			$item_data['name'],
 			$item_data['category'],
@@ -943,7 +967,7 @@ class Items extends Secure_Controller
 			$line['Tax 2 Percent']
 		);
 
-	//Add in Stock Location values to check for numeric
+		//Add in Stock Location values to check for numeric
 		$allowed_locations	= $this->Stock_location->get_allowed_locations();
 
 		foreach($allowed_locations as $location_id => $location_name)
@@ -951,7 +975,7 @@ class Items extends Secure_Controller
 			$check_for_numeric_values[] = $line['location_'. $location_name];
 		}
 
-	//Check for non-numeric values which require numeric
+		//Check for non-numeric values which require numeric
 		foreach($check_for_numeric_values as $value)
 		{
 			if(!is_numeric($value) && $value != '')
@@ -961,7 +985,7 @@ class Items extends Secure_Controller
 			}
 		}
 
-	//Check Attribute Data
+		//Check Attribute Data
 		$definition_names = $this->Attribute->get_definition_names();
 		unset($definition_names[-1]);
 
@@ -1063,7 +1087,7 @@ class Items extends Secure_Controller
 	 */
 	private function save_inventory_quantities($line, $item_data)
 	{
-	//Quantities & Inventory Section
+		//Quantities & Inventory Section
 		$employee_id		= $this->Employee->get_logged_in_employee_info()->person_id;
 		$emp_info			= $this->Employee->get_info($employee_id);
 		$comment			= $this->lang->line('items_inventory_CSV_import_quantity');
@@ -1136,7 +1160,7 @@ class Items extends Secure_Controller
 	{
 		$filename = pathinfo($item->pic_filename, PATHINFO_FILENAME);
 
-	// if the field is empty there's nothing to check
+		// if the field is empty there's nothing to check
 		if(!empty($filename))
 		{
 			$ext = pathinfo($item->pic_filename, PATHINFO_EXTENSION);

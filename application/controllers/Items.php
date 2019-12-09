@@ -641,11 +641,24 @@ class Items extends Secure_Controller
 			//Event triggers for Third-Party Integrations
 				if($new_item)
 				{
+<<<<<<< Upstream, based on origin/master
 					Events::Trigger('event_create', array("type"=> "ITEMS", "data" => array($item_data)), 'string');
+=======
+				    $event_failures = Events::Trigger('event_create', array("type"=> "ITEMS", "data" => $item_data), 'string');
+>>>>>>> 238f25a Implementing 3rd Party Integrations Event Generator
 				}
 				else
 				{
+<<<<<<< Upstream, based on origin/master
 					Events::Trigger('event_update', array("type"=> "ITEMS", "data" => array($item_data)), 'string');
+=======
+				    $event_failures = Events::Trigger('event_update', array("type"=> "ITEMS", "data" => $item_data), 'string');
+				}
+				
+				if($event_failures)
+				{
+				    log_message("ERROR","Third-Party Integration failed during item save: $event_failures");
+>>>>>>> 238f25a Implementing 3rd Party Integrations Event Generator
 				}
 			}
 			else
@@ -805,9 +818,20 @@ class Items extends Secure_Controller
 		{
 			$message = $this->lang->line('items_successful_deleted') . ' ' . count($items_to_delete) . ' ' . $this->lang->line('items_one_or_multiple');
 			echo json_encode(array('success' => TRUE, 'message' => $message));
+<<<<<<< Upstream, based on origin/master
 
 		//Event triggers for Third-Party Integrations
 			Events::Trigger('event_delete', array("type"=> "ITEMS", "data" => $items_to_delete), 'string');
+=======
+			
+			//Event triggers for Third-Party Integrations
+			$event_failures = Events::Trigger('event_delete', array("type"=> "ITEMS", "data" => $items_to_delete), 'string');
+			
+			if($event_failures)
+			{
+				log_message("ERROR","Third-Party Integration failed during item delete: $event_failures");
+			}
+>>>>>>> 238f25a Implementing 3rd Party Integrations Event Generator
 		}
 		else
 		{
@@ -889,15 +913,32 @@ class Items extends Secure_Controller
 						$this->save_tax_data($line, $item_data);
 						$this->save_inventory_quantities($line, $item_data);
 						$this->save_attribute_data($line, $item_data);
+<<<<<<< Upstream, based on origin/master
 
+=======
+						
+>>>>>>> 238f25a Implementing 3rd Party Integrations Event Generator
 					//Event triggers for Third-Party Integrations
 						if($this->Item->item_number_exists($item_number))
 						{
+<<<<<<< Upstream, based on origin/master
 							Events::Trigger('event_update', array("type"=> "ITEMS", "data" => $item_data), 'string');
+=======
+						    $event_failures = Events::Trigger('event_update', array("type"=> "ITEMS", "data" => $item_data), 'string');
+>>>>>>> 238f25a Implementing 3rd Party Integrations Event Generator
 						}
 						else
 						{
+<<<<<<< Upstream, based on origin/master
 							Events::Trigger('event_create', array("type"=> "ITEMS", "data" => $item_data), 'string');
+=======
+						    $event_failures = Events::Trigger('event_create', array("type"=> "ITEMS", "data" => $item_data), 'string');
+						}
+						
+						if($event_failures)
+						{
+						    log_message("ERROR","Third-Party Integration failed during CSV Import: $event_failures");
+>>>>>>> 238f25a Implementing 3rd Party Integrations Event Generator
 						}
 					}
 

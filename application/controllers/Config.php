@@ -243,8 +243,9 @@ class Config extends Secure_Controller
 			$data['clcdesq']['api_url'] = '';
 		}
 
-		$data['mailchimp']['lists'] 				= $this->_mailchimp();
+		$data['mailchimp']['lists'] 						= $this->_mailchimp();
 
+		$data['clcdesq']['enable']				 			= $this->config->item('clcdesq_enable');
 		$data['clcdesq']['available_attributes'] 			= $this->Attribute->get_definition_names(FALSE);
 		$data['clcdesq']['aspectratio_attribute'] 			= $this->config->item('clcdesq_aspectratio');			//-
 		$data['clcdesq']['audiencerating_attribute']		= $this->config->item('clcdesq_audiencerating');		//-
@@ -253,6 +254,7 @@ class Config extends Secure_Controller
 		$data['clcdesq']['binding_attribute'] 				= $this->config->item('clcdesq_binding');
 		$data['clcdesq']['depth_attribute'] 				= $this->config->item('clcdesq_depth');
 		$data['clcdesq']['format_attribute'] 				= $this->config->item('clcdesq_format');				//-
+		$data['clcdesq']['guid_attribute']	 				= $this->config->item('clcdesq_guid');
 		$data['clcdesq']['height_attribute'] 				= $this->config->item('clcdesq_height');
 		$data['clcdesq']['numberofpages_attribute']			= $this->config->item('clcdesq_numberofpages');			//-
 		$data['clcdesq']['originaltitle_attribute']			= $this->config->item('clcdesq_originaltitle');
@@ -539,12 +541,15 @@ class Config extends Secure_Controller
 			$clcdesq_api_url = $this->encryption->encrypt($this->input->post('clcdesq_api_url'));
 		}
 
+		$clcdesq_enable = $this->input->post('clcdesq_enable') != NULL;
+
 		$batch_save_data = array(
 			'mailchimp_api_key'				=> $mailchimp_api_key,
 			'mailchimp_list_id' 			=> $mailchimp_list_id,
 			'clcdesq_api_key' 				=> $clcdesq_api_key,
 			'clcdesq_api_url' 				=> $clcdesq_api_url,
-			
+			'clcdesq_enable'				=> $clcdesq_enable,
+
 			'clcdesq_aspectratio'			=> $this->input->post('clcdesq_aspectratio_id'),
 			'clcdesq_audioformat' 			=> $this->input->post('clcdesq_audioformat_id'),
 			'clcdesq_audiencerating'		=> $this->input->post('clcdesq_audiencerating_id'),
@@ -552,6 +557,7 @@ class Config extends Secure_Controller
 			'clcdesq_binding'				=> $this->input->post('clcdesq_binding_id'),
 			'clcdesq_depth'					=> $this->input->post('clcdesq_depth_id'),
 			'clcdesq_format' 				=> $this->input->post('clcdesq_format_id'),
+			'clcdesq_guid' 					=> $this->input->post('clcdesq_guid_id'),
 			'clcdesq_height'				=> $this->input->post('clcdesq_height_id'),
 			'clcdesq_numberofpages'			=> $this->input->post('clcdesq_numberofpages_id'),
 			'clcdesq_originaltitle'			=> $this->input->post('clcdesq_originaltitle_id'),
@@ -649,7 +655,7 @@ class Config extends Secure_Controller
 		// all locations not available in post will be deleted now
 		$deleted_locations = $this->Stock_location->get_all()->result_array();
 
-		foreach($deleted_locations as $location => $location_data)
+		foreach($deleted_locations as $location_data)
 		{
 			if(!in_array($location_data['location_id'], $not_to_delete))
 			{
@@ -697,7 +703,7 @@ class Config extends Secure_Controller
 			// all tables not available in post will be deleted now
 			$deleted_tables = $this->Dinner_table->get_all()->result_array();
 
-			foreach($deleted_tables as $dinner_tables => $table)
+			foreach($deleted_tables as $table)
 			{
 				if(!in_array($table['dinner_table_id'], $not_to_delete))
 				{
@@ -787,7 +793,7 @@ class Config extends Secure_Controller
 			// all packages not available in post will be deleted now
 			$deleted_packages = $this->Customer_rewards->get_all()->result_array();
 
-			foreach($deleted_packages as $customer_rewards => $reward_category)
+			foreach($deleted_packages as $reward_category)
 			{
 				if(!in_array($reward_category['package_id'], $not_to_delete))
 				{
@@ -998,7 +1004,9 @@ class Config extends Secure_Controller
 
 			$file_name = 'ospos-' . date("Y-m-d-H-i-s") .'.zip';
 			$save = 'uploads/' . $file_name;
+
 			$this->load->helper('download');
+
 			while(ob_get_level())
 			{
 				ob_end_clean();

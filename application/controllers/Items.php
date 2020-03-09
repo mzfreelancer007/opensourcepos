@@ -491,16 +491,16 @@ class Items extends Secure_Controller
 
 	public function save($item_id = -1)
 	{
-		$upload_success = $this->_handle_image_upload();
-		$upload_data = $this->upload->data();
-
-		$receiving_quantity = parse_quantity($this->input->post('receiving_quantity'));
-		$item_type = $this->input->post('item_type') == NULL ? ITEM : $this->input->post('item_type');
+		$upload_success		= $this->_handle_image_upload();
+		$upload_data		= $this->upload->data();
+		$receiving_quantity	= parse_quantity($this->input->post('receiving_quantity'));
+		$item_type 			= $this->input->post('item_type') == NULL ? ITEM : $this->input->post('item_type');
 
 		if($receiving_quantity == '0' && $item_type!= ITEM_TEMP)
 		{
 			$receiving_quantity = '1';
 		}
+
 		$default_pack_name = $this->lang->line('items_default_pack_name');
 
 		//Save item data
@@ -585,7 +585,7 @@ class Items extends Secure_Controller
 				$success &= $this->Item_taxes->save($items_taxes_data, $item_id);
 			}
 
-		//Save item quantity
+			//Save item quantity
 			$stock_locations = $this->Stock_location->get_undeleted_all()->result_array();
 			foreach($stock_locations as $location)
 			{
@@ -638,27 +638,14 @@ class Items extends Secure_Controller
 
 				echo json_encode(array('success' => TRUE, 'message' => $message, 'id' => $item_id));
 
-			//Event triggers for Third-Party Integrations
+				//Event triggers for Third-Party Integrations
 				if($new_item)
 				{
-<<<<<<< Upstream, based on origin/master
 					Events::Trigger('event_create', array("type"=> "ITEMS", "data" => array($item_data)), 'string');
-=======
-				    $event_failures = Events::Trigger('event_create', array("type"=> "ITEMS", "data" => $item_data), 'string');
->>>>>>> 238f25a Implementing 3rd Party Integrations Event Generator
 				}
 				else
 				{
-<<<<<<< Upstream, based on origin/master
 					Events::Trigger('event_update', array("type"=> "ITEMS", "data" => array($item_data)), 'string');
-=======
-				    $event_failures = Events::Trigger('event_update', array("type"=> "ITEMS", "data" => $item_data), 'string');
-				}
-				
-				if($event_failures)
-				{
-				    log_message("ERROR","Third-Party Integration failed during item save: $event_failures");
->>>>>>> 238f25a Implementing 3rd Party Integrations Event Generator
 				}
 			}
 			else
@@ -818,20 +805,9 @@ class Items extends Secure_Controller
 		{
 			$message = $this->lang->line('items_successful_deleted') . ' ' . count($items_to_delete) . ' ' . $this->lang->line('items_one_or_multiple');
 			echo json_encode(array('success' => TRUE, 'message' => $message));
-<<<<<<< Upstream, based on origin/master
 
-		//Event triggers for Third-Party Integrations
-			Events::Trigger('event_delete', array("type"=> "ITEMS", "data" => $items_to_delete), 'string');
-=======
-			
 			//Event triggers for Third-Party Integrations
-			$event_failures = Events::Trigger('event_delete', array("type"=> "ITEMS", "data" => $items_to_delete), 'string');
-			
-			if($event_failures)
-			{
-				log_message("ERROR","Third-Party Integration failed during item delete: $event_failures");
-			}
->>>>>>> 238f25a Implementing 3rd Party Integrations Event Generator
+			Events::Trigger('event_delete', array("type"=> "ITEMS", "data" => $items_to_delete), 'string');
 		}
 		else
 		{
@@ -913,32 +889,15 @@ class Items extends Secure_Controller
 						$this->save_tax_data($line, $item_data);
 						$this->save_inventory_quantities($line, $item_data);
 						$this->save_attribute_data($line, $item_data);
-<<<<<<< Upstream, based on origin/master
 
-=======
-						
->>>>>>> 238f25a Implementing 3rd Party Integrations Event Generator
-					//Event triggers for Third-Party Integrations
+						//Event triggers for Third-Party Integrations
 						if($this->Item->item_number_exists($item_number))
 						{
-<<<<<<< Upstream, based on origin/master
 							Events::Trigger('event_update', array("type"=> "ITEMS", "data" => $item_data), 'string');
-=======
-						    $event_failures = Events::Trigger('event_update', array("type"=> "ITEMS", "data" => $item_data), 'string');
->>>>>>> 238f25a Implementing 3rd Party Integrations Event Generator
 						}
 						else
 						{
-<<<<<<< Upstream, based on origin/master
 							Events::Trigger('event_create', array("type"=> "ITEMS", "data" => $item_data), 'string');
-=======
-						    $event_failures = Events::Trigger('event_create', array("type"=> "ITEMS", "data" => $item_data), 'string');
-						}
-						
-						if($event_failures)
-						{
-						    log_message("ERROR","Third-Party Integration failed during CSV Import: $event_failures");
->>>>>>> 238f25a Implementing 3rd Party Integrations Event Generator
 						}
 					}
 
@@ -987,7 +946,7 @@ class Items extends Secure_Controller
 			$item_data['unit_price']
 		);
 
-		foreach($check_for_empty as $key => $val)
+		foreach($check_for_empty as $val)
 		{
 			if (empty($val))
 			{
@@ -1011,7 +970,7 @@ class Items extends Secure_Controller
 		//Add in Stock Location values to check for numeric
 		$allowed_locations	= $this->Stock_location->get_allowed_locations();
 
-		foreach($allowed_locations as $location_id => $location_name)
+		foreach($allowed_locations as $location_name)
 		{
 			$check_for_numeric_values[] = $line['location_'. $location_name];
 		}
@@ -1195,7 +1154,7 @@ class Items extends Secure_Controller
 	/**
 	 * Guess whether file extension is not in the table field, if it isn't, then it's an old-format (formerly pic_id) field, so we guess the right filename and update the table
 	 *
-	 * @param $item the item to update
+	 * @param $item object Item to update
 	 */
 	private function _update_pic_filename($item)
 	{

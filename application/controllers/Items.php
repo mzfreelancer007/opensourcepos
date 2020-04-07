@@ -357,10 +357,12 @@ class Items extends Secure_Controller
 	public function inventory($item_id = -1)
 	{
 		$item_info = $this->Item->get_info($item_id);
+
 		foreach(get_object_vars($item_info) as $property => $value)
 		{
 			$item_info->$property = $this->xss_clean($value);
 		}
+
 		$data['item_info'] = $item_info;
 
 		$data['stock_locations'] = array();
@@ -380,10 +382,12 @@ class Items extends Secure_Controller
 	public function count_details($item_id = -1)
 	{
 		$item_info = $this->Item->get_info($item_id);
+
 		foreach(get_object_vars($item_info) as $property => $value)
 		{
 			$item_info->$property = $this->xss_clean($value);
 		}
+
 		$data['item_info'] = $item_info;
 
 		$data['stock_locations'] = array();
@@ -441,12 +445,12 @@ class Items extends Secure_Controller
 
 		foreach($data['definition_values'] as $definition_id => $definition_value)
 		{
-			$attribute_value = $this->Attribute->get_attribute_value($item_id, $definition_id);
-			$attribute_id = (empty($attribute_value) || empty($attribute_value->attribute_id)) ? NULL : $attribute_value->attribute_id;
-			$values = &$data['definition_values'][$definition_id];
-			$values['attribute_id'] = $attribute_id;
-			$values['attribute_value'] = $attribute_value;
-			$values['selected_value'] = '';
+			$attribute_value			= $this->Attribute->get_attribute_value($item_id, $definition_id);
+			$attribute_id				= (empty($attribute_value) || empty($attribute_value->attribute_id)) ? NULL : $attribute_value->attribute_id;
+			$values						= &$data['definition_values'][$definition_id];
+			$values['attribute_id'] 	= $attribute_id;
+			$values['attribute_value']	= $attribute_value;
+			$values['selected_value']	= '';
 
 			if ($definition_value['definition_type'] == DROPDOWN)
 			{
@@ -491,6 +495,7 @@ class Items extends Secure_Controller
 
 	public function save($item_id = -1)
 	{
+
 		$upload_success		= $this->_handle_image_upload();
 		$upload_data		= $this->upload->data();
 		$receiving_quantity	= parse_quantity($this->input->post('receiving_quantity'));
@@ -559,7 +564,7 @@ class Items extends Secure_Controller
 			$success = TRUE;
 			$new_item = FALSE;
 
-		//New item
+			//New item
 			if($item_id == -1)
 			{
 				$item_id = $item_data['item_id'];
@@ -617,7 +622,7 @@ class Items extends Secure_Controller
 				}
 			}
 
-		// Save item attributes
+			// Save item attributes
 			$attribute_links = $this->input->post('attribute_links') != NULL ? $this->input->post('attribute_links') : array();
 			$attribute_ids = $this->input->post('attribute_ids');
 			$this->Attribute->delete_link($item_id);

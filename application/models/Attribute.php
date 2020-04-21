@@ -5,9 +5,9 @@
 
 class Attribute extends CI_Model
 {
-	const SHOW_IN_ITEMS = 1;
-	const SHOW_IN_SALES = 2;
-	const SHOW_IN_RECEIVINGS = 4;
+	const SHOW_IN_ITEMS			= 1;
+	const SHOW_IN_SALES			= 2;
+	const SHOW_IN_RECEIVINGS	= 4;
 
 	public static function get_definition_flags()
 	{
@@ -298,10 +298,10 @@ class Attribute extends CI_Model
 	{
 		$success = FALSE;
 
-		//From TEXT to DATETIME
+		//From TEXT
 		if($from_type === TEXT)
 		{
-		//To DATETIME or DECIMAL
+			//To DATETIME or DECIMAL
 			if(in_array($to_type, [DATE, DECIMAL], TRUE))
 			{
 				$field = ($to_type === DATE ? 'attribute_date' : 'attribute_decimal');
@@ -322,7 +322,7 @@ class Attribute extends CI_Model
 				}
 			}
 
-		//To DROPDOWN or CHECKBOX
+			//To DROPDOWN or CHECKBOX
 			else if($to_type === DROPDOWN)
 			{
 				$success = TRUE;
@@ -344,8 +344,7 @@ class Attribute extends CI_Model
 			}
 		}
 
-		//From DROPDOWN to TEXT
-
+		//From DROPDOWN
 		else if($from_type === DROPDOWN)
 		{
 			//To TEXT
@@ -388,6 +387,7 @@ class Attribute extends CI_Model
 
 			$this->db->trans_complete();
 		}
+
 		//From any other type
 		else
 		{

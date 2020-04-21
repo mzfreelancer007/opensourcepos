@@ -10,6 +10,7 @@ class Config extends Secure_Controller
 
 		$this->load->library('barcode_lib');
 		$this->load->library('sale_lib');
+		$this->load->library('clcdesq_integration_lib');
 	}
 
 	/*
@@ -33,7 +34,8 @@ class Config extends Secure_Controller
 			$license[$i]['text'] = 'LICENSE file must be in OSPOS license directory. You are not allowed to use OSPOS application until the distribution copy of LICENSE file is present.';
 		}
 
-		$dir = new DirectoryIterator('license');	// read all the files in the dir license
+		//Read all the files in the dir license
+		$dir = new DirectoryIterator('license');
 
 		foreach($dir as $fileinfo)
 		{
@@ -98,7 +100,7 @@ class Config extends Secure_Controller
 								{
 									$license[$i]['text'] .= $key2 . ': ';
 
-									foreach($val2 as $key3 => $val3)
+									foreach($val2 as $val3)
 									{
 										$license[$i]['text'] .= $val3 . ' ';
 									}
@@ -218,7 +220,6 @@ class Config extends Secure_Controller
 		// load all the themes, already XSS cleaned in the private function
 		$data['themes'] = $this->_themes();
 
-		//Load General related fields
 		$image_allowed_types 		= array('jpg','jpeg','gif','svg','webp','bmp','png','tif','tiff');
 		$data['image_allowed_types']	= array_combine($image_allowed_types,$image_allowed_types);
 
@@ -257,6 +258,7 @@ class Config extends Secure_Controller
 		$data['clcdesq']['bookindex_attribute'] 			= $this->config->item('clcdesq_bookindex');
 		$data['clcdesq']['booksamplechapter_attribute'] 	= $this->config->item('clcdesq_booksamplechapter');
 		$data['clcdesq']['category_attribute'] 				= $this->config->item('clcdesq_category');
+		$data['clcdesq']['condition_attribute']				= $this->config->item('clcdesq_condition');
 		$data['clcdesq']['depth_attribute'] 				= $this->config->item('clcdesq_depth');
 		$data['clcdesq']['format_attribute'] 				= $this->config->item('clcdesq_format');
 		$data['clcdesq']['height_attribute'] 				= $this->config->item('clcdesq_height');
@@ -572,6 +574,7 @@ class Config extends Secure_Controller
 			'clcdesq_bookindex'				=> $this->input->post('clcdesq_bookindex_id'),
 			'clcdesq_booksamplechapter'		=> $this->input->post('clcdesq_booksamplechapter_id'),
 			'clcdesq_category'				=> $this->input->post('clcdesq_category_id'),
+			'clcdesq_condition'				=> $this->input->post('clcdesq_condition_id'),
 			'clcdesq_depth'					=> $this->input->post('clcdesq_depth_id'),
 			'clcdesq_format' 				=> $this->input->post('clcdesq_format_id'),
 			'clcdesq_upc'					=> $this->input->post('clcdesq_upc_id'),
@@ -1036,12 +1039,18 @@ class Config extends Secure_Controller
 				ob_end_clean();
 			}
 
-			force_download($file_name, $backup);
+			force_download($save, $backup);
 		}
 		else
 		{
 			redirect('no_access/config');
 		}
 	}
+
+	public function initial_items_upload()
+	{
+		$this->clcdesq_integration_lib->items_upload();
+	}
+
 }
 ?>

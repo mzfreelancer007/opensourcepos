@@ -357,12 +357,10 @@ class Items extends Secure_Controller
 	public function inventory($item_id = -1)
 	{
 		$item_info = $this->Item->get_info($item_id);
-
 		foreach(get_object_vars($item_info) as $property => $value)
 		{
 			$item_info->$property = $this->xss_clean($value);
 		}
-
 		$data['item_info'] = $item_info;
 
 		$data['stock_locations'] = array();
@@ -382,12 +380,10 @@ class Items extends Secure_Controller
 	public function count_details($item_id = -1)
 	{
 		$item_info = $this->Item->get_info($item_id);
-
 		foreach(get_object_vars($item_info) as $property => $value)
 		{
 			$item_info->$property = $this->xss_clean($value);
 		}
-
 		$data['item_info'] = $item_info;
 
 		$data['stock_locations'] = array();
@@ -495,7 +491,6 @@ class Items extends Secure_Controller
 
 	public function save($item_id = -1)
 	{
-
 		$upload_success		= $this->_handle_image_upload();
 		$upload_data		= $this->upload->data();
 		$receiving_quantity	= parse_quantity($this->input->post('receiving_quantity'));
@@ -538,7 +533,6 @@ class Items extends Secure_Controller
 		}
 
 		$x = $this->input->post('tax_category_id');
-
 		if(!isset($x))
 		{
 			$item_data['tax_category_id'] = '';
@@ -592,6 +586,7 @@ class Items extends Secure_Controller
 
 			//Save item quantity
 			$stock_locations = $this->Stock_location->get_undeleted_all()->result_array();
+
 			foreach($stock_locations as $location)
 			{
 				$updated_quantity = parse_quantity($this->input->post('quantity_' . $location['location_id']));
@@ -623,8 +618,9 @@ class Items extends Secure_Controller
 			}
 
 			// Save item attributes
-			$attribute_links = $this->input->post('attribute_links') != NULL ? $this->input->post('attribute_links') : array();
-			$attribute_ids = $this->input->post('attribute_ids');
+			$attribute_links	= $this->input->post('attribute_links') != NULL ? $this->input->post('attribute_links') : array();
+			$attribute_ids		= $this->input->post('attribute_ids');
+
 			$this->Attribute->delete_link($item_id);
 
 			foreach($attribute_links as $definition_id => $attribute_id)

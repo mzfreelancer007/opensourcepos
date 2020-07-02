@@ -894,11 +894,11 @@ class Items extends Secure_Controller
 						//Event triggers for Third-Party Integrations
 						if($this->Item->item_number_exists($item_number))
 						{
-							Events::Trigger('event_update', array("type"=> "ITEMS", "data" => $item_data), 'string');
+							Events::Trigger('event_update', array("type"=> "ITEMS", "data" => array($item_data)), 'string');
 						}
 						else
 						{
-							Events::Trigger('event_create', array("type"=> "ITEMS", "data" => $item_data), 'string');
+							Events::Trigger('event_create', array("type"=> "ITEMS", "data" => array($item_data)), 'string');
 						}
 					}
 

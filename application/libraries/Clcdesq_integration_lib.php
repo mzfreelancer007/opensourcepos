@@ -106,7 +106,7 @@ class Clcdesq_integration_lib
 		$pushdata	= $this->populate_api_data($item_data);
 
 	//Delete specific flags
-		foreach($pushdata as $product)
+		foreach($pushdata as &$product)
 		{
 			$product['Published'] 		= FALSE;
 			$product['ShowOnWebsite']	= FALSE;
@@ -180,6 +180,9 @@ class Clcdesq_integration_lib
 		foreach($data as $product)
 		{
 			$item_id			= $product['item_id'];
+//TODO: MAKE ONE SINGLE CALL AND GET ALL ATTRIBUTE VALUES FOR THAT ITEM RATHER THAN INDIVIDUAL CALLS.
+//TODO: OPTIMIZE THE CALLS.  LOOK AT THE SLOW_LOG TO SEE IF ANY UNINDEXED JOINS ARE HAPPENING.
+			$attribute_values	= $this->CI->Attribute->get_attributes_by_item($item_id);
 			$number_of_discs	= $this->CI->Attribute->get_attribute_value($item_id, $config_data['clcdesq_numberofdiscs'])->attribute_decimal;
 			$number_of_pages	= $this->CI->Attribute->get_attribute_value($item_id, $config_data['clcdesq_numberofpages'])->attribute_decimal;
 			$running_time		= $this->CI->Attribute->get_attribute_value($item_id, $config_data['clcdesq_runningtime'])->attribute_decimal;
@@ -206,6 +209,7 @@ class Clcdesq_integration_lib
 				'EAN' 					=> $this->get_ean($this->get_isbn($product['item_number'])),
 				'Format' 				=> $this->CI->Attribute->get_attribute_value($item_id, $config_data['clcdesq_format'])->attribute_value,
 				'Height'		 		=> (float)$this->CI->Attribute->get_attribute_value($item_id, $config_data['clcdesq_height'])->attribute_decimal,
+				'Image'					=> $this->get_image_array($item_id),
 				'InternalCode' 			=> (string)$item_id,
 				'ISBN'		 			=> $this->get_isbn($product['item_number']),
 				'KindId'		 		=> $product['category'] == 'Books' ? 1 : NULL,		/* Regular Book*/
@@ -786,6 +790,7 @@ class Clcdesq_integration_lib
 		}
 
 		$all_items = array_chunk($all_items,100);
+
 		foreach($all_items as $chunked_items)
 		{
 			$push_data	= $this->populate_api_data($chunked_items);
@@ -803,5 +808,18 @@ class Clcdesq_integration_lib
 			log_message("ERROR", "New Product JSON Results: $json");
 			log_message("ERROR", "API Results: $results");
 		}
+	}
+
+
+	private function get_image_array($item_id)
+	{
+		$image_file = $this->CI->Item->get_info($item_id)->pic_filename;
+
+		if($image_file !== NULL)
+		{
+			return array('UrlOriginal' => base_url()."/uploads/item_pics/$image_file");
+		}
+
+		return NULL;
 	}
 }
